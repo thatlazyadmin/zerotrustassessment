@@ -14,11 +14,8 @@ steps:
     version: '6.x'
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
-- script: dir
-  displayName: 'List Directory Contents'
-
 - script: |
-    dotnet build path/to/solution.sln --configuration $(buildConfiguration)
+    dotnet build ZeroTrustAssessment.sln --configuration $(buildConfiguration)
   displayName: 'Build Project'
 
 - task: PublishBuildArtifacts@1
