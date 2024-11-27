@@ -1,0 +1,38 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- pwsh: |
+    Write-Host "Debugging Environment Variables:"
+    Write-Host "CLIENTID: $env:CLIENTID"
+    Write-Host "TENANTID: $env:TENANTID"
+    if ($env:CLIENTSECRET) {
+        Write-Host "CLIENTSECRET is set."
+    } else {
+        Write-Error "CLIENTSECRET is not set. Ensure the CLIENTSECRET variable is correctly configured in your pipeline."
+    }
+  displayName: "Debug Environment Variables"
+  env:
+    CLIENTID: $(CLIENTID)
+    TENANTID: $(TENANTID)
+    CLIENTSECRET: $(CLIENTSECRET)
+
+- task: PowerShell@2
+  displayName: "Run Zero Trust Assessment"
+  inputs:
+    targetType: 'filePath'
+    filePath: './Tests/ZTAssessment.ps1'
+    pwsh: true
+  env:
+    CLIENTID: $(CLIENTID)
+    TENANTID: $(TENANTID)
+    CLIENTSECRET: $(CLIENTSECRET)
+
+- task: PublishBuildArtifacts@1
+  displayName: "Publish Assessment Results"
+  inputs:
+    pathToPublish: './ZeroTrustAssessmentResults.csv'
+    artifactName: 'ZeroTrustResults'
