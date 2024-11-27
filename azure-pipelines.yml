@@ -5,12 +5,15 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
+  # Define default variables using Azure DevOps-supported syntax
   buildConfiguration: 'Release'
 
 steps:
+# Step 1: Checkout the repository
 - task: Checkout@1
   displayName: 'Checkout Repository'
 
+# Step 2: Use .NET SDK
 - task: UseDotNet@2
   displayName: 'Set up .NET SDK'
   inputs:
@@ -18,13 +21,23 @@ steps:
     version: '6.x'
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
+# Step 3: List directory contents for debugging
 - script: dir
   displayName: 'List Directory Contents'
 
+# Step 4: Set buildConfiguration dynamically if not already set
+- script: |
+    if [ -z "$(buildConfiguration)" ]; then
+        echo ##vso[task.setvariable variable=buildConfiguration]Release
+    fi
+  displayName: 'Set Default Build Configuration'
+
+# Step 5: Build the solution
 - script: |
     dotnet build src/ZeroTrustAssessment.sln --configuration $(buildConfiguration)
   displayName: 'Build Solution'
 
+# Step 6: Publish build artifacts
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Build Artifacts'
   inputs:
