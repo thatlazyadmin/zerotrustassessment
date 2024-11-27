@@ -1,24 +1,41 @@
+# Trigger pipeline on push to the main branch
 trigger:
 - main
 
+# Use a Windows-based agent pool
 pool:
   vmImage: 'windows-latest'
 
+# Define variables for the build configuration
 variables:
   buildConfiguration: 'Release'
 
+# Steps to execute in the pipeline
 steps:
+# Step 1: Checkout the repository
+- task: Checkout@1
+  displayName: 'Checkout Repository'
+
+# Step 2: Use .NET SDK
 - task: UseDotNet@2
+  displayName: 'Set up .NET SDK'
   inputs:
     packageType: 'sdk'
     version: '6.x'
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
-- script: |
-    dotnet build ZeroTrustAssessment.sln --configuration $(buildConfiguration)
-  displayName: 'Build Project'
+# Step 3: List directory contents for debugging (optional but useful)
+- script: dir
+  displayName: 'List Directory Contents'
 
+# Step 4: Build the solution file
+- script: |
+    dotnet build src/ZeroTrustAssessment.sln --configuration $(buildConfiguration)
+  displayName: 'Build Solution'
+
+# Step 5: Publish build artifacts
 - task: PublishBuildArtifacts@1
+  displayName: 'Publish Build Artifacts'
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
